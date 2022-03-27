@@ -1,0 +1,44 @@
+name: main
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "下载代码"
+        uses: actions/checkout@v2
+      - name: "初始化Go环境"
+        uses: actions/setup-go@v3.0.0
+        with:
+          go-version: 1.18
+      - name: "golint"
+        run: |
+          go install golang.org/x/lint/golint@latest
+          golint -set_exit_status=1 ./...
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "下载代码"
+        uses: actions/checkout@v2
+      - name: "初始化Go环境"
+        uses: actions/setup-go@v3.0.0
+        with:
+          go-version: 1.18
+      - name: "install libjpegturbo"
+        run: sudo apt-get install -y libturbojpeg0-dev
+      - name: "go test"
+        run: go test -v -race -coverprofile=coverage.out -covermode=atomic
+      - name: "codecov"
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+          flags: unittests
+          fail_ci_if_error: true
+          verbose: true
