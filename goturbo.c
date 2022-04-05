@@ -148,11 +148,47 @@ bailout:
     jres->origin_height = dinfo.image_height;
     jres->color_space = dinfo.jpeg_color_space;
     jres->num_components = dinfo.num_components;
-    //jpeg_destroy_decompress(&dinfo);
+    jpeg_destroy_decompress(&dinfo);
     if (img_row != NULL) {
         free(img_row);
     }
     if (row_pointer != NULL) {
         free(row_pointer);
+    }
+}
+
+// 编码jpeg图片
+void jpeg_encode(unsigned char* img, int width, int height, int pixel_format, jpeg_encode_options* options,
+    jpeg_encode_result *jres) {
+    int            quality    = DEFAULT_QUALITY;
+    int            flag       = 0;
+    int            sub_sample = TJSAMP_420;
+    tjhandle       tj_handler = NULL;
+
+    tj_handler = tjInitCompress();
+    if (tj_handler == NULL) {
+        goto bailout;
+    }
+    if (options != NULL) {
+        if (options->quality > 0) {
+            quality = options->quality;
+        }
+        flag = options->tj_flag;
+        if (options->sub_sample >= 0) {
+            sub_sample = options->sub_sample;
+        }
+    }
+    if (tjCompress2(tj_handler, img, width, 0, height, pixel_format, &(jres->img), &(jres->img_size), sub_sample,
+        quality, flag) < 0) {
+        goto bailout;
+    }
+    tjDestroy(tj_handler);
+    return;
+bailout:
+    // 错误异常处理
+    jres->err = (char*)malloc(sizeof(char) * JMSG_LENGTH_MAX);
+    memcpy(jres->err, tjGetErrorStr2(tj_handler), JMSG_LENGTH_MAX);
+    if (tj_handler != NULL) {
+        tjDestroy(tj_handler);
     }
 }

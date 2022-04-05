@@ -10,9 +10,11 @@ package gojpegturbo
 import "C"
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"image"
+	"io"
 	"unsafe"
 )
 
@@ -121,4 +123,13 @@ func Decode(img []byte, options *DecodeOptions) (*ImageAttr, error) {
 		ComponentsNum: int(jres.num_components),
 	}
 	return imgAttr, nil
+}
+
+// DecodeReader 解码reader过来的图片
+func DecodeReader(r io.Reader, options *DecodeOptions) (*ImageAttr, error) {
+	buf := bytes.NewBuffer(nil)
+	if _, err := buf.ReadFrom(r); err != nil {
+		return nil, err
+	}
+	return Decode(buf.Bytes(), options)
 }

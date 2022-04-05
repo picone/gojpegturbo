@@ -1,5 +1,6 @@
 package gojpegturbo
 
+import "C"
 import (
 	"image"
 	"image/color"
@@ -51,4 +52,12 @@ func (img *ImageAttr) At(x, y int) color.Color {
 		G: img.Img[offset+1],
 		B: img.Img[offset+2],
 	}
+}
+
+// PixelFormat 像素格式
+func (img *ImageAttr) PixelFormat() TJPixelFormat {
+	if img.ColorSpace == ColorSpaceGrayScale {
+		return TJPixelFormatGray
+	}
+	return TJPixelFormatRGB
 }

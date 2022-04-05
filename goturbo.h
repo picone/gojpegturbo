@@ -8,6 +8,8 @@
 #include "turbojpeg.h"
 #include "jpeglib.h"
 
+#define DEFAULT_QUALITY 95
+
 // 搞一个新的err mgr，因为原来的不能保存last_msg信息。
 typedef struct my_jpeg_err_mgr {
     struct jpeg_error_mgr mgr;
@@ -33,7 +35,7 @@ typedef struct jpeg_decode_options {
 } jpeg_decode_options;
 
 typedef struct jpeg_decode_result {
-    unsigned char *img;
+    unsigned char* img;
     unsigned int img_size;
     unsigned int image_width;
     unsigned int image_height;
@@ -41,8 +43,20 @@ typedef struct jpeg_decode_result {
     unsigned int origin_height;
     J_COLOR_SPACE color_space;
     int num_components;
-    char *err;
+    char* err;
 } jpeg_decode_result;
+
+typedef struct jpeg_encode_options {
+    int quality;
+    int tj_flag;
+    int sub_sample;
+} jpeg_encode_options;
+
+typedef struct jpeg_encode_result {
+    unsigned char* img;
+    unsigned long img_size;
+    char* err;
+} jpeg_encode_result;
 
 // 覆盖原来的output_message方法，因为原来的会打印到控制台。
 static void jpeg_err_output_msg(j_common_ptr cinfo);
@@ -52,5 +66,9 @@ static void jpeg_err_exit(j_common_ptr cinfo);
 
 // 解码jpeg图片
 void jpeg_decode(unsigned char* img, unsigned int img_size, jpeg_decode_options* options, jpeg_decode_result* jres);
+
+// 编码jpeg图片
+void jpeg_encode(unsigned char* img, int width, int height, int pixel_format, jpeg_encode_options* options,
+    jpeg_encode_result *jres);
 
 #endif

@@ -152,10 +152,12 @@ func TestDecode(t *testing.T) {
 func BenchmarkDecodeC(b *testing.B) {
 	buf, err := ioutil.ReadFile("./testdata/test.jpg")
 	require.NoError(b, err)
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Decode(buf, nil)
 		assert.NoError(b, err)
 	}
+	b.SetBytes(int64(len(buf)))
 }
 
 func BenchmarkDecodeDctFast(b *testing.B) {
@@ -163,10 +165,12 @@ func BenchmarkDecodeDctFast(b *testing.B) {
 	require.NoError(b, err)
 	options := NewDecodeOptions()
 	options.DctMethod = DctMethodIntFast
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Decode(buf, options)
 		assert.NoError(b, err)
 	}
+	b.SetBytes(int64(len(buf)))
 }
 
 func BenchmarkDecodeDoSloppierSampling(b *testing.B) {
@@ -174,10 +178,12 @@ func BenchmarkDecodeDoSloppierSampling(b *testing.B) {
 	require.NoError(b, err)
 	options := NewDecodeOptions()
 	options.DoFancyUpSampling = false
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Decode(buf, options)
 		assert.NoError(b, err)
 	}
+	b.SetBytes(int64(len(buf)))
 }
 
 func BenchmarkDecodeDitherOrdered(b *testing.B) {
@@ -185,10 +191,12 @@ func BenchmarkDecodeDitherOrdered(b *testing.B) {
 	require.NoError(b, err)
 	options := NewDecodeOptions()
 	options.DitherMode = DitherOrdered
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Decode(buf, options)
 		assert.NoError(b, err)
 	}
+	b.SetBytes(int64(len(buf)))
 }
 
 func BenchmarkDecodeLessColors(b *testing.B) {
@@ -196,17 +204,21 @@ func BenchmarkDecodeLessColors(b *testing.B) {
 	require.NoError(b, err)
 	options := NewDecodeOptions()
 	options.DesiredNumberOfColors = 216
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Decode(buf, options)
 		assert.NoError(b, err)
 	}
+	b.SetBytes(int64(len(buf)))
 }
 
 func BenchmarkDecodeGo(b *testing.B) {
 	buf, err := ioutil.ReadFile("./testdata/test.jpg")
 	require.NoError(b, err)
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _, err := image.Decode(bytes.NewBuffer(buf))
 		assert.NoError(b, err)
 	}
+	b.SetBytes(int64(len(buf)))
 }
