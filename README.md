@@ -1,6 +1,7 @@
 [![Build](https://github.com/picone/gojpegturbo/actions/workflows/main.yml/badge.svg)](https://github.com/picone/gojpegturbo/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/picone/gojpegturbo/branch/main/graph/badge.svg)](https://codecov.io/gh/picone/gojpegturbo)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
+[![rcard](https://goreportcard.com/badge/github.com/picone/gojpegturbo)](https://goreportcard.com/report/github.com/picone/gojpegturbo)
 
 # gojpegturbo
 
@@ -31,13 +32,12 @@ func main() {
 		log.Fatalln(err)
 	}
 	options := gojpegturbo.NewDecodeOptions()
-	options.DctMethod = gojpegturbo.DctMethodIntFast
-	options.DitherMode = gojpegturbo.DitherOrdered
-	options.TwoPassQuantize = false
-	options.DoFancyUpSampling = false
-	options.DesiredNumberOfColors = 216
+	options.CropRect = &image.Rectangle{
+		Min: image.Point{X: 100, Y: 200},
+		Max: image.Point{X: 300, Y: 400},
+	}
 	outImg, err := gojpegturbo.Decode(buf, options)
-	fmt.Println(outImg.Bounds().Max) // (600,800)
+	fmt.Println(outImg.Bounds().Max) // (200,200)
 }
 ```
 
@@ -92,10 +92,12 @@ func main() {
 		log.Fatalln(err)
 	}
 	options := gojpegturbo.NewDecodeOptions()
-	options.ScaleNum = 1
-	options.ScaleDenom = 2
+	options.DctMethod = gojpegturbo.DctMethodIntFast
+	options.DitherMode = gojpegturbo.DitherOrdered
+	options.TwoPassQuantize = false
+	options.DoFancyUpSampling = false
+	options.DesiredNumberOfColors = 216
 	outImg, err := gojpegturbo.Decode(buf, options)
-	fmt.Println(outImg.Bounds().Max) // (300,400)
 }
 ```
 
