@@ -36,7 +36,7 @@ func TestImageAttr(t *testing.T) {
 		},
 		//{
 		//	name:     "case 2-gray",
-		//	filename: "./testdata/gray.jpg",
+		//	filename: "./testdata/error.jpg",
 		//	want: want{
 		//		colorModel: color.GrayModel,
 		//		bounds: image.Rectangle{

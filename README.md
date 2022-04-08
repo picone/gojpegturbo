@@ -113,17 +113,37 @@ goarch: amd64
 pkg: github.com/picone/gojpegturbo
 cpu: Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz
 BenchmarkDecodeC
-BenchmarkDecodeC-4                    	     391	   2700117 ns/op
+BenchmarkDecodeC-4                    	     469	   2585729 ns/op	  33.79 MB/s
 BenchmarkDecodeDctFast
-BenchmarkDecodeDctFast-4              	     477	   2461163 ns/op
+BenchmarkDecodeDctFast-4              	     465	   2500954 ns/op	  34.93 MB/s
 BenchmarkDecodeDoSloppierSampling
-BenchmarkDecodeDoSloppierSampling-4   	     500	   2656346 ns/op
+BenchmarkDecodeDoSloppierSampling-4   	     484	   2428223 ns/op	  35.98 MB/s
 BenchmarkDecodeDitherOrdered
-BenchmarkDecodeDitherOrdered-4        	     464	   2536009 ns/op
+BenchmarkDecodeDitherOrdered-4        	     448	   3118717 ns/op	  28.01 MB/s
 BenchmarkDecodeLessColors
-BenchmarkDecodeLessColors-4           	     459	   2599797 ns/op
+BenchmarkDecodeLessColors-4           	     460	   2749298 ns/op	  31.78 MB/s
 BenchmarkDecodeGo
-BenchmarkDecodeGo-4                   	     133	   8788681 ns/op
+BenchmarkDecodeGo-4                   	     135	   8480772 ns/op	  10.30 MB/s
+PASS
+```
+
+### Encode性能测试
+
+以下为单张图片测试
+
+```text
+goos: darwin
+goarch: amd64
+pkg: github.com/picone/gojpegturbo
+cpu: Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz
+BenchmarkEncodeC
+BenchmarkEncodeC-4                    	     508	   2334368 ns/op	  37.42 MB/s
+BenchmarkEncodeFast
+BenchmarkEncodeFast-4                 	     516	   2317246 ns/op	  37.70 MB/s
+BenchmarkEncodeProgress
+BenchmarkEncodeProgress-4             	      86	  12894303 ns/op	   6.78 MB/s
+BenchmarkEncodeGo
+BenchmarkEncodeGo-4                   	      43	  26813204 ns/op	   3.26 MB/s
 PASS
 ```
 

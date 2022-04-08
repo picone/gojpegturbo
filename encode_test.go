@@ -3,7 +3,9 @@ package gojpegturbo
 import (
 	"bytes"
 	"image"
+	"image/jpeg"
 	_ "image/jpeg" // 注册jpeg解码库
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -91,4 +93,61 @@ func TestEncode(t *testing.T) {
 			}
 		})
 	}
+}
+
+func BenchmarkEncodeC(b *testing.B) {
+	buf, err := ioutil.ReadFile("./testdata/test.jpg")
+	require.NoError(b, err)
+	img, err := Decode(buf, nil)
+	require.NoError(b, err)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := Encode(img, nil)
+		assert.NoError(b, err)
+	}
+	b.SetBytes(int64(len(buf)))
+}
+
+func BenchmarkEncodeFast(b *testing.B) {
+	buf, err := ioutil.ReadFile("./testdata/test.jpg")
+	require.NoError(b, err)
+	img, err := Decode(buf, nil)
+	require.NoError(b, err)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		options := NewEncodeOptions()
+		options.FastDct = true
+		_, err := Encode(img, options)
+		assert.NoError(b, err)
+	}
+	b.SetBytes(int64(len(buf)))
+}
+
+func BenchmarkEncodeProgress(b *testing.B) {
+	buf, err := ioutil.ReadFile("./testdata/test.jpg")
+	require.NoError(b, err)
+	img, err := Decode(buf, nil)
+	require.NoError(b, err)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		options := NewEncodeOptions()
+		options.Progressive = true
+		_, err := Encode(img, options)
+		assert.NoError(b, err)
+	}
+	b.SetBytes(int64(len(buf)))
+}
+
+func BenchmarkEncodeGo(b *testing.B) {
+	buf, err := ioutil.ReadFile("./testdata/test.jpg")
+	require.NoError(b, err)
+	img, err := Decode(buf, nil)
+	require.NoError(b, err)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		out := bytes.NewBuffer(nil)
+		err := jpeg.Encode(out, img, nil)
+		assert.NoError(b, err)
+	}
+	b.SetBytes(int64(len(buf)))
 }

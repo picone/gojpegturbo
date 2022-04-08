@@ -126,9 +126,16 @@ func TestDecode(t *testing.T) {
 		{
 			name: "case 9-error",
 			args: args{
-				filename: "./testdata/gray.jpg",
+				filename: "./testdata/error.jpg",
 			},
 			wantErr: true,
+		},
+		{
+			name: "case 10-gray",
+			args: args{
+				filename: "./testdata/gray.jpg",
+			},
+			wantSize: image.Point{X: 600, Y: 800},
 		},
 	}
 	for _, tt := range tests {
