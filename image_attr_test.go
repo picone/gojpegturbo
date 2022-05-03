@@ -4,7 +4,9 @@ import (
 	"image"
 	"image/color"
 	"image/jpeg"
+	"io"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,8 +15,9 @@ import (
 
 func TestImageAttr(t *testing.T) {
 	type want struct {
-		colorModel color.Model
-		bounds     image.Rectangle
+		colorModel  color.Model
+		bounds      image.Rectangle
+		pixelFormat TJPixelFormat
 	}
 	tests := []struct {
 		name     string
@@ -32,21 +35,23 @@ func TestImageAttr(t *testing.T) {
 						Y: 800,
 					},
 				},
+				pixelFormat: TJPixelFormatRGB,
 			},
 		},
-		//{
-		//	name:     "case 2-gray",
-		//	filename: "./testdata/error.jpg",
-		//	want: want{
-		//		colorModel: color.GrayModel,
-		//		bounds: image.Rectangle{
-		//			Max: image.Point{
-		//				X: 600,
-		//				Y: 800,
-		//			},
-		//		},
-		//	},
-		//},
+		{
+			name:     "case 2-gray",
+			filename: "./testdata/gray.jpg",
+			want: want{
+				colorModel: color.GrayModel,
+				bounds: image.Rectangle{
+					Max: image.Point{
+						X: 600,
+						Y: 800,
+					},
+				},
+				pixelFormat: TJPixelFormatGray,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -56,8 +61,61 @@ func TestImageAttr(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tt.want.colorModel, img.ColorModel())
 			assert.Equal(t, tt.want.bounds, img.Bounds())
+			assert.Equal(t, tt.want.pixelFormat, img.PixelFormat())
 			err = jpeg.Encode(ioutil.Discard, img, nil)
 			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestImageAttr_ResizeArea(t *testing.T) {
+	tests := []struct {
+		name      string
+		filename  string
+		dstWidth  int
+		dstHeight int
+		wantErr   assert.ErrorAssertionFunc
+	}{
+		{
+			name:      "case 1",
+			filename:  "./testdata/test.jpg",
+			dstWidth:  500,
+			dstHeight: 100,
+		},
+		{
+			name:      "case 2-error size",
+			filename:  "./testdata/test.jpg",
+			dstWidth:  1000,
+			dstHeight: 200,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.ErrorAs(t, ErrWrongDstSize, &err)
+			},
+		},
+		{
+			name:      "case 3",
+			filename:  "./testdata/gray.jpg",
+			dstWidth:  422,
+			dstHeight: 235,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fp, err := os.Open(tt.filename)
+			require.NoError(t, err)
+			img, err := DecodeReader(fp, nil)
+			require.NoError(t, err)
+			got, err := img.ResizeArea(tt.dstWidth, tt.dstHeight)
+			if tt.wantErr == nil {
+				require.NoError(t, err)
+				assert.Equal(t, got.ImageWidth, tt.dstWidth)
+				assert.Equal(t, got.ImageHeight, tt.dstHeight)
+				assert.Equal(t, got.OriginWidth, tt.dstWidth)
+				assert.Equal(t, got.OriginHeight, tt.dstHeight)
+				err = jpeg.Encode(io.Discard, got, nil)
+				require.NoError(t, err)
+			} else {
+				tt.wantErr(t, err)
+			}
 		})
 	}
 }

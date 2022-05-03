@@ -37,12 +37,6 @@ func (img *ImageAttr) Bounds() image.Rectangle {
 
 // At 获取指定像素点的RBG颜色
 func (img *ImageAttr) At(x, y int) color.Color {
-	if x > img.ImageWidth || y > img.ImageHeight || x < 0 || y < 0 {
-		if img.ColorSpace == ColorSpaceGrayScale {
-			return &color.Gray{}
-		}
-		return &color.RGBA{}
-	}
 	offset := (x + y*img.ImageWidth) * img.ComponentsNum
 	if img.ColorSpace == ColorSpaceGrayScale {
 		return &color.Gray{Y: img.Img[offset]}
@@ -60,4 +54,9 @@ func (img *ImageAttr) PixelFormat() TJPixelFormat {
 		return TJPixelFormatGray
 	}
 	return TJPixelFormatRGB
+}
+
+// ResizeArea 用INTER_AREA方法缩小图片，这个方法不能用于图片放大。
+func (img *ImageAttr) ResizeArea(dstWidth, dstHeight int) (*ImageAttr, error) {
+	return ResizeArea(img, dstWidth, dstHeight)
 }
