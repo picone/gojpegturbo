@@ -2,6 +2,7 @@ package gojpegturbo
 
 import "C"
 import (
+	"github.com/nfnt/resize"
 	"image"
 	"image/color"
 )
@@ -56,7 +57,17 @@ func (img *ImageAttr) PixelFormat() TJPixelFormat {
 	return TJPixelFormatRGB
 }
 
-// ResizeArea 用INTER_AREA方法缩小图片，这个方法不能用于图片放大。
+// ResizeArea 用 INTER_AREA 方法缩小图片，这个方法不能用于图片放大。
 func (img *ImageAttr) ResizeArea(dstWidth, dstHeight int) (*ImageAttr, error) {
 	return ResizeArea(img, dstWidth, dstHeight)
+}
+
+// ResizeNN 使用 NearestNeighbor 算法缩放图片，速度很快，但是会有锯齿。
+func (img *ImageAttr) ResizeNN(dstWidth, dstHeight int) *ImageAttr {
+	return ResizeNN(img, dstWidth, dstHeight)
+}
+
+// ResizeBilinear 使用 Bilinear （双线插值）算法，速度次之，但是锯齿会少很多。
+func (img *ImageAttr) ResizeBilinear(dstWidth, dstHeight uint) image.Image {
+	return resize.Resize(dstWidth, dstHeight, img, resize.Bilinear)
 }

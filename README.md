@@ -147,6 +147,25 @@ BenchmarkEncodeGo-4                   	      43	  26813204 ns/op	   3.26 MB/s
 PASS
 ```
 
+### 缩放性能测试
+
+由于使用了自己的`ImageAttr`类，图片缩放并不能很好地兼容[nfnt/resize](https://github.com/nfnt/resize)，
+因此自己实现了 NearestNeighbor 和 Area 的图片缩放算法。
+
+```text
+goos: darwin
+goarch: amd64
+pkg: github.com/picone/gojpegturbo
+cpu: Intel(R) Core(TM) i7-5650U CPU @ 2.20GHz
+BenchmarkImageAttr_ResizeArea
+BenchmarkImageAttr_ResizeArea-4       	     310	   4008882 ns/op
+BenchmarkImageAttr_ResizeNN
+BenchmarkImageAttr_ResizeNN-4         	    2302	    478747 ns/op
+BenchmarkImageAttr_ResizeBilinear
+BenchmarkImageAttr_ResizeBilinear-4   	      48	  25154275 ns/op
+PASS
+```
+
 ## Contributing
 
 - Please create an issue in [issue list](https://github.com/picone/gojpegturbo/issues).
