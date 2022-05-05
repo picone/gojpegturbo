@@ -2,16 +2,16 @@ name: main
 
 on:
   push:
-    branches: [ main ]
+
   pull_request:
-    branches: [ main ]
+    types: [opened, reopened]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: "下载代码"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: "初始化Go环境"
         uses: actions/setup-go@v3.0.0
         with:
@@ -20,6 +20,17 @@ jobs:
         run: |
           go install golang.org/x/lint/golint@latest
           golint -set_exit_status=1 ./...
+      - uses: shenxianpeng/cpp-linter-action@v1
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: file
+          files-changed-only: false
+      - name: Fail fast?!
+        if: steps.linter.outputs.checks-failed > 0
+        run: |
+          echo "Some files failed the linting checks!"
 
   test:
     runs-on: ubuntu-latest
