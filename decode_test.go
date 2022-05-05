@@ -137,6 +137,17 @@ func TestDecode(t *testing.T) {
 			},
 			wantSize: image.Point{X: 600, Y: 800},
 		},
+		{
+			name: "case 11-expect size",
+			args: args{
+				filename: "./testdata/test.jpg",
+				options: &DecodeOptions{
+					ExpectWidth:  100,
+					ExpectHeight: 200,
+				},
+			},
+			wantSize: image.Point{X: 150, Y: 200},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

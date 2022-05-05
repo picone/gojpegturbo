@@ -37,8 +37,16 @@ type DecodeOptions struct {
 	DoFancyUpSampling bool
 	// ScaleNum 按比例缩放图片，在MCU升降采样的时候就能生效，一般为1
 	ScaleNum uint
-	// ScaleDenom 缩放比例的分母，为了保证图片效果，一般取值为1/2,1/4,1/8...
+	// ScaleDenom 缩放比例的分母，为了保证图片效果，一般取值为 1/2, 1/4, 1/8...
 	ScaleDenom uint
+	// ExpectWidth 预期宽度，根据图片宽高使用ScaleNum和ScaleDenom参数调整缩放比例。如果设置了会覆盖ScaleNum和ScaleDenom的值。这里缩放的
+	// 意义在于能在解码阶段低成本的缩放图片，尽量节省 CPU 和内存，且对实际使用效果影响很小。
+	//
+	// WARNING: 这里只是期望值，并不是实际值，内部会尽量等比缩放到不低于期望值的最合理值，它始终只会以 1/2，1/4，1/8 这样的比例缩小图片。如输入
+	// 尺寸为 600*800，期望值为 100*200，则实际结果为 150*200；若期望值为 250*300， 则实际结果为 300*400。
+	ExpectWidth uint
+	// ExpectHeight 预期高度，根据图片宽高使用ScaleNum和ScaleDenom参数调整缩放比例
+	ExpectHeight uint
 }
 
 // NewDecodeOptions 创建一个默认的解码图片选项
@@ -67,6 +75,8 @@ func (options *DecodeOptions) toCOptions() (*C.jpeg_decode_options, error) {
 		desired_number_of_colors: C.int(options.DesiredNumberOfColors),
 		scale_num:                C.uint(options.ScaleNum),
 		scale_denom:              C.uint(options.ScaleDenom),
+		expect_width:             C.uint(options.ExpectWidth),
+		expect_height:            C.uint(options.ExpectHeight),
 	}
 	if options.TwoPassQuantize {
 		co.two_pass_quantize = C.int(1)

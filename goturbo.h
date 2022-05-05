@@ -32,6 +32,7 @@ typedef struct jpeg_decode_options {
     int desired_number_of_colors;
     boolean do_fancy_upsampling;
     unsigned int scale_num, scale_denom;
+    unsigned int expect_width, expect_height;
 } jpeg_decode_options;
 
 typedef struct jpeg_decode_result {
@@ -70,5 +71,8 @@ void jpeg_decode(unsigned char* img, unsigned int img_size, jpeg_decode_options*
 // 编码jpeg图片
 void jpeg_encode(unsigned char* img, int width, int height, int pixel_format, jpeg_encode_options* options,
     jpeg_encode_result *jres);
+
+static void jpeg_find_denom(unsigned int width, unsigned int height, unsigned int expect_width,
+    unsigned int expect_height, unsigned int *scale_num, unsigned int *scale_denom);
 
 #endif

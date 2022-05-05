@@ -53,7 +53,10 @@ void jpeg_decode(unsigned char* img, unsigned int img_size, jpeg_decode_options*
         dinfo.dither_mode = options->dither_mode;
         dinfo.desired_number_of_colors = options->desired_number_of_colors;
         dinfo.do_fancy_upsampling = options->do_fancy_upsampling;
-        if (options->scale_num > 0 && options->scale_denom > 0) {
+        if (options->expect_width > 0 && options->expect_height > 0) {
+            jpeg_find_denom(dinfo.image_width, dinfo.image_height, options->expect_width, options->expect_height,
+                &dinfo.scale_num, &dinfo.scale_denom);
+        } else if (options->scale_num > 0 && options->scale_denom > 0) {
             dinfo.scale_num = options->scale_num;
             dinfo.scale_denom = options->scale_denom;
         }
@@ -190,5 +193,32 @@ bailout:
     memcpy(jres->err, tjGetErrorStr2(tj_handler), JMSG_LENGTH_MAX);
     if (tj_handler != NULL) {
         tjDestroy(tj_handler);
+    }
+}
+
+static void jpeg_find_denom(unsigned int width, unsigned int height, unsigned int expect_width,
+    unsigned int expect_height, unsigned int *scale_num, unsigned int *scale_denom) {
+    static const tjscalingfactor scale_factors[] = {
+        {1, 1},
+        {1, 2},
+        {1, 4},
+        {1, 8}
+    };
+    int i = 0;
+    int tmp_width = 0, tmp_height = 0;
+
+    if (scale_num == NULL || scale_denom == NULL) {
+        return;
+    }
+    // factors的缩小比例从小到大，scale_factors[0]是无缩放的
+    for (i = 1; i < sizeof(scale_factors) / sizeof(tjscalingfactor); ++i) {
+        tmp_width = TJSCALED(width, scale_factors[i]);
+        tmp_height = TJSCALED(height, scale_factors[i]);
+        if (tmp_width < expect_width || tmp_height < expect_height) {
+            //恰好小于dst，说明上一组的缩放比例正合适
+            *scale_num = (unsigned int)scale_factors[i - 1].num;
+            *scale_denom = (unsigned int)scale_factors[i - 1].denom;
+            return;
+        }
     }
 }
